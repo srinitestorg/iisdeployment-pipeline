@@ -30,36 +30,54 @@ jobs:
           name: dotnet-app
           path: publish
 
-  deploy:
-    needs: build
-    runs-on: [self-hosted, windows]
+deploy:
+  needs: build
+  runs-on: [self-hosted, windows]
 
-    steps:
-      - name: Download Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: dotnet-app
-          path: publish
+  steps:
+    - name: Download Artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: dotnet-app
+        path: publish
 
-      - name: Verify Published Files
-        shell: powershell
-        run: |
-          Write-Host "Published files:"
-          Get-ChildItem publish -Recurse
+    - name: Verify Published Files
+      shell: powershell
+      run: |
+        Write-Host "Published files:"
+        Get-ChildItem publish -Recurse
 
-      - name: Deploy to IIS using MSDeploy
-        shell: powershell
-        run: |
-          $msdeploy = "C:\Program Files\IIS\Microsoft Web Deploy V3\msdeploy.exe"
+    - name: Locate MSDeploy
+      shell: powershell
+      run: |
+        Get-ChildItem "C:\Program Files*\IIS" -Recurse -Filter msdeploy.exe
 
-          & $msdeploy `
-            -verb:sync `
-            -source:contentPath="publish" `
-            -dest:contentPath="DemoApi",computerName="https://${{ secrets.IIS_SERVER }}:8172/msdeploy.axd?site=DemoApi",userName="${{ secrets.IIS_USERNAME }}",password="${{ secrets.IIS_PASSWORD }}",authType="Basic" `
-            -allowUntrusted
+    - name: Deploy to IIS using MSDeploy
+      shell: powershell
+      run: |
 
-      - name: Restart IIS App Pool
-        shell: powershell
-        run: |
-          Import-Module WebAdministration
-          Restart-WebAppPool -Name "DemoApiPool"
+        $msdeploy = Get-ChildItem `
+          "C:\Program Files*\IIS" `
+          -Recurse `
+          -Filter msdeploy.exe `
+          | Select-Object -First 1 -ExpandProperty FullName
+
+        $publishPath = (Resolve-Path ".\publish").Path
+
+        Write-Host "MSDeploy Path: $msdeploy"
+        Write-Host "Publish Path: $publishPath"
+
+        & $msdeploy `
+          -verb:sync `
+          -source:contentPath="$publishPath" `
+          -dest:contentPath="DemoApi",computerName="https://${{ secrets.IIS_SERVER }}:8172/msdeploy.axd?site=DemoApi",userName="${{ secrets.IIS_USERNAME }}",password="${{ secrets.IIS_PASSWORD }}",authType="Basic" `
+          -allowUntrusted `
+          -disableLink:AppPoolExtension `
+          -disableLink:ContentExtension `
+          -disableLink:CertificateExtension
+
+    - name: Restart IIS App Pool
+      shell: powershell
+      run: |
+        Import-Module WebAdministration
+        Restart-WebAppPool -Name "DemoApiPool"
