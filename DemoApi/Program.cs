@@ -36,6 +36,10 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
+// Add a new welcome API endpoint for testing
+app.MapGet("/welcome", () => "Welcome to the Demo API!")
+   .WithName("WelcomeApi");
+
 app.Run();
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

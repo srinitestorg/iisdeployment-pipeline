@@ -31,3 +31,4 @@ C:\DotnetVmDeployDemo\DemoApi\obj\Debug\net8.0\refint\DemoApi.dll
 C:\DotnetVmDeployDemo\DemoApi\obj\Debug\net8.0\DemoApi.pdb
 C:\DotnetVmDeployDemo\DemoApi\obj\Debug\net8.0\DemoApi.genruntimeconfig.cache
 C:\DotnetVmDeployDemo\DemoApi\obj\Debug\net8.0\ref\DemoApi.dll
+C:\DotnetVmDeployDemo\DemoApi\obj\Debug\net8.0\DemoApi.sourcelink.json
