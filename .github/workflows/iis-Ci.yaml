@@ -51,10 +51,17 @@ jobs:
       - name: Stop IIS Site
         shell: powershell
         run: |
-          ssh -o StrictHostKeyChecking=no `
-          -i $env:USERPROFILE\.ssh\id_rsa `
-          ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
-          'powershell "Import-Module WebAdministration; Stop-Website -Name ''DemoApi'' -ErrorAction SilentlyContinue; Stop-WebAppPool -Name ''DemoApiPool'' -ErrorAction SilentlyContinue"'
+          try {
+            ssh -o StrictHostKeyChecking=no `
+            -i $env:USERPROFILE\.ssh\id_rsa `
+            ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
+            'powershell "Import-Module WebAdministration; Stop-Website -Name ''DemoApi''; Stop-WebAppPool -Name ''DemoApiPool''"'
+          }
+          catch {
+            Write-Host "Ignoring stop errors..."
+          }
+
+          exit 0
 
       - name: Copy Files To IIS VM
         shell: powershell
