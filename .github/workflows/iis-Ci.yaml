@@ -41,15 +41,27 @@ jobs:
           name: dotnet-app
           path: publish
 
-      - name: Copy files to IIS VM
+      - name: Setup SSH Key
         shell: powershell
         run: |
-          scp -o StrictHostKeyChecking=no -r publish/* `
+          mkdir $env:USERPROFILE\.ssh -Force
+
+          @"
+  ${{ secrets.SSH_PRIVATE_KEY }}
+  "@ | Out-File $env:USERPROFILE\.ssh\id_rsa -Encoding ascii
+
+      - name: Copy Files To IIS VM
+        shell: powershell
+        run: |
+          scp -o StrictHostKeyChecking=no `
+          -i $env:USERPROFILE\.ssh\id_rsa `
+          -r publish/* `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:/c:/inetpub/DemoApi/
 
       - name: Restart IIS App Pool
         shell: powershell
         run: |
           ssh -o StrictHostKeyChecking=no `
+          -i $env:USERPROFILE\.ssh\id_rsa `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
           "powershell -Command `"Import-Module WebAdministration; Restart-WebAppPool -Name 'DemoApiPool'`""
