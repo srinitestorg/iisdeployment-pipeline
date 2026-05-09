@@ -48,6 +48,14 @@ jobs:
 
           "${{ secrets.SSH_PRIVATE_KEY }}" | Out-File $env:USERPROFILE\.ssh\id_rsa -Encoding ascii
 
+      - name: Stop IIS App Pool
+        shell: powershell
+        run: |
+          ssh -o StrictHostKeyChecking=no `
+          -i $env:USERPROFILE\.ssh\id_rsa `
+          ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
+          "powershell -Command \"Import-Module WebAdministration; Stop-WebAppPool -Name 'DemoApiPool'\""
+
       - name: Copy Files To IIS VM
         shell: powershell
         run: |
@@ -56,10 +64,10 @@ jobs:
           -r publish/* `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:/c:/inetpub/DemoApi/
 
-      - name: Restart IIS App Pool
+      - name: Start IIS App Pool
         shell: powershell
         run: |
           ssh -o StrictHostKeyChecking=no `
           -i $env:USERPROFILE\.ssh\id_rsa `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
-          "powershell -Command `"Import-Module WebAdministration; Restart-WebAppPool -Name 'DemoApiPool'`""
+          "powershell -Command \"Import-Module WebAdministration; Start-WebAppPool -Name 'DemoApiPool'\""
