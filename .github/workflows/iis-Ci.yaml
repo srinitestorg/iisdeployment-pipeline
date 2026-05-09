@@ -46,9 +46,7 @@ jobs:
         run: |
           mkdir $env:USERPROFILE\.ssh -Force
 
-          @"
-  ${{ secrets.SSH_PRIVATE_KEY }}
-  "@ | Out-File $env:USERPROFILE\.ssh\id_rsa -Encoding ascii
+          "${{ secrets.SSH_PRIVATE_KEY }}" | Out-File $env:USERPROFILE\.ssh\id_rsa -Encoding ascii
 
       - name: Copy Files To IIS VM
         shell: powershell
