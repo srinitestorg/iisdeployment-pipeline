@@ -48,20 +48,23 @@ jobs:
 
           "${{ secrets.SSH_PRIVATE_KEY }}" | Out-File $env:USERPROFILE\.ssh\id_rsa -Encoding ascii
 
-      - name: Stop IIS Site
+      - name: Stop IIS Completely
         shell: powershell
         run: |
-          try {
-            ssh -o StrictHostKeyChecking=no `
-            -i $env:USERPROFILE\.ssh\id_rsa `
-            ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
-            'powershell "Import-Module WebAdministration; Stop-Website -Name ''DemoApi''; Stop-WebAppPool -Name ''DemoApiPool''"'
-          }
-          catch {
-            Write-Host "Ignoring stop errors..."
-          }
+          ssh -o StrictHostKeyChecking=no `
+          -i $env:USERPROFILE\.ssh\id_rsa `
+          ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
+          'powershell "iisreset /stop"'
 
-          exit 0
+          Start-Sleep -Seconds 10
+
+      - name: Clean Existing Files
+        shell: powershell
+        run: |
+          ssh -o StrictHostKeyChecking=no `
+          -i $env:USERPROFILE\.ssh\id_rsa `
+          ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
+          'powershell "Remove-Item C:\inetpub\DemoApi\* -Recurse -Force -ErrorAction SilentlyContinue"'
 
       - name: Copy Files To IIS VM
         shell: powershell
@@ -71,10 +74,10 @@ jobs:
           -r publish/* `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:/c:/inetpub/DemoApi/
 
-      - name: Start IIS Site
+      - name: Start IIS Completely
         shell: powershell
         run: |
           ssh -o StrictHostKeyChecking=no `
           -i $env:USERPROFILE\.ssh\id_rsa `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
-          'powershell "Import-Module WebAdministration; Start-WebAppPool -Name ''DemoApiPool''; Start-Website -Name ''DemoApi''"'
+          'powershell "iisreset /start"'
