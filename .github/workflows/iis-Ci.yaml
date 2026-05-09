@@ -44,14 +44,12 @@ jobs:
       - name: Copy files to IIS VM
         shell: powershell
         run: |
-          sshpass -p "${{ secrets.VM_PASSWORD }}" `
-            scp -r publish/* `
-            ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:/c:/inetpub/DemoApi/
+          scp -o StrictHostKeyChecking=no -r publish/* `
+          ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }}:/c:/inetpub/DemoApi/
 
       - name: Restart IIS App Pool
         shell: powershell
         run: |
-          sshpass -p "${{ secrets.VM_PASSWORD }}" `
-            ssh -o StrictHostKeyChecking=no `
-            ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
-            "powershell -Command `"Import-Module WebAdministration; Restart-WebAppPool -Name 'DemoApiPool'`""
+          ssh -o StrictHostKeyChecking=no `
+          ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
+          "powershell -Command `"Import-Module WebAdministration; Restart-WebAppPool -Name 'DemoApiPool'`""
