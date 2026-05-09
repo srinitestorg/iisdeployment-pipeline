@@ -54,7 +54,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no `
           -i $env:USERPROFILE\.ssh\id_rsa `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
-          "powershell -Command \"Import-Module WebAdministration; Stop-WebAppPool -Name 'DemoApiPool'\""
+          'powershell "Import-Module WebAdministration; Stop-WebAppPool -Name ''DemoApiPool''"'
 
       - name: Copy Files To IIS VM
         shell: powershell
@@ -70,4 +70,4 @@ jobs:
           ssh -o StrictHostKeyChecking=no `
           -i $env:USERPROFILE\.ssh\id_rsa `
           ${{ secrets.VM_USERNAME }}@${{ secrets.VM_HOST }} `
-          "powershell -Command \"Import-Module WebAdministration; Start-WebAppPool -Name 'DemoApiPool'\""
+          'powershell "Import-Module WebAdministration; Start-WebAppPool -Name ''DemoApiPool''"'
