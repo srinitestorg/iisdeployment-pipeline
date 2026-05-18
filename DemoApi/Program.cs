@@ -37,7 +37,7 @@ app.MapGet("/weatherforecast", () =>
 .WithOpenApi();
 
 // Add a new welcome API endpoint for testing
-app.MapGet("/welcome", () => "Welcome to the Demo API! V5")
+app.MapGet("/welcome", () => "Welcome to the Demo API! V6")
    .WithName("WelcomeApi");
 
 app.Run();
